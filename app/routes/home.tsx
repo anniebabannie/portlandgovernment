@@ -7,6 +7,7 @@ import { OrgTreeSection, type Office } from "../components/org-tree-section";
 import { CountyMapSection } from "../components/county-map-section";
 import { DistrictMapSection } from "../components/district-map-section";
 import { DivisionTreeSection, type Division } from "../components/division-tree-section";
+import { MetroSection } from "../components/metro-section";
 import { UsMapSection } from "../components/us-map-section";
 
 // Colors per kind of branch, so the federal and city trees line up.
@@ -631,6 +632,48 @@ export default function Home() {
         }}
       />
 
+      <MetroSection
+        id="metro"
+        intros={["Now, here's where things get a little confusing."]}
+        label="Map that starts on Multnomah County, with Portland inside it, then zooms out to Washington, Multnomah, and Clackamas counties. Metro's boundary covers the urban parts of all three. Zoomed out further, the Portland metro area is much larger, spanning seven counties in Oregon and Washington."
+        captions={[
+          <>
+            <span className="text-flag-green">Portland</span> lives in
+            Multnomah. Cool.
+          </>,
+          <>
+            But there's{" "}
+            <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
+              another region
+            </span>{" "}
+            that overlaps with several nearby counties.
+          </>,
+          <>
+            It's called <span className="text-flag-blue-dark">Metro</span>. Yes,
+            just “Metro.” It's the only one in Oregon.
+          </>,
+          <>
+            <span className="text-flag-blue-dark">Metro</span>'s boundaries were
+            drawn based on the primary urban areas in this region.
+          </>,
+          <>
+            It's a government that oversees problems that don't stop at city
+            limits, across the three counties it overlaps.
+          </>,
+          <>
+            Note: <span className="text-flag-blue-dark">Metro</span> is{" "}
+            <strong className="font-extrabold">not</strong> the same as the
+            “Portland metro area.”
+          </>,
+          <>
+            <span className="text-flag-blue-dark">Metro</span> is a government.
+            The Portland metro area is a <em>statistical</em> boundary. It has
+            no elected or appointed officials.
+          </>,
+        ]}
+        metroAreaAt={5}
+      />
+
       <UsMapSection
         id="voting"
         intros={[
@@ -658,22 +701,41 @@ export default function Home() {
           </>,
         ]}
         then={{
-          captions: [
-            <>
-              This is also when we vote on{" "}
-              <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
-                measures
-              </span>
-              : rules that voters decide directly. If passed, these can become
-              any of the following:
-            </>,
+          steps: [
+            {
+              show: "documents",
+              caption: (
+                <>
+                  This is also when we vote on{" "}
+                  <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
+                    measures
+                  </span>
+                  : rules that voters decide directly. If passed, these can become
+                  any of the following:
+                </>
+              ),
+            },
+            {
+              caption: (
+                <>
+                  Elections happen on two-year and staggered four-year cycles.
+                </>
+              ),
+            },
+            { show: "jurisdictions" },
           ],
-          documentsAt: 0,
           documents: [
             { label: "Laws", symbol: "§" },
             { label: "Charter or constitutional amendments", symbol: "+" },
             { label: "Tax levies", symbol: "%" },
             { label: "Bonds", symbol: "$" },
+          ],
+          jurisdictions: [
+            { label: "United States", shape: "us" },
+            { label: "Oregon", shape: "oregon" },
+            { label: "Metro", shape: "metro" },
+            { label: "Multnomah County", shape: "county" },
+            { label: "City of Portland", shape: "portland" },
           ],
         }}
       />

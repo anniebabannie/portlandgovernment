@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { metroPath, metroViewBox, oregonViewBox } from "../content/metro-boundary";
+import { countyPath, countyViewBox } from "../content/multnomah-county";
+import { districts, districtsViewBox } from "../content/portland-districts";
 import {
   oregonPath,
   salem,
@@ -21,10 +24,20 @@ type Props = {
   captions: ReactNode[];
   label: string;
   /**
-   * Steps after the map: it fades out, these captions follow, and from the
-   * caption at `documentsAt` a row of paper documents appears.
+   * Steps after the map, which fades out. Each step can bring in a visual; a
+   * step without a caption keeps the previous one on screen.
    */
-  then?: { captions: ReactNode[]; documentsAt: number; documents: MeasureDocument[] };
+  then?: {
+    steps: { caption?: ReactNode; show?: "documents" | "jurisdictions" }[];
+    documents?: MeasureDocument[];
+    jurisdictions?: Jurisdiction[];
+  };
+};
+
+/** A government whose outline appears in the row of jurisdictions. */
+export type Jurisdiction = {
+  label: string;
+  shape: "us" | "oregon" | "metro" | "county" | "portland";
 };
 
 export type MeasureDocument = {
@@ -58,25 +71,42 @@ const callouts: Callout[] = [
  */
 export function UsMapSection({ id, intros, captions, label, then }: Props) {
   const beatStep = (b: number) => intros.length + b;
-  const allCaptions = [...captions, ...(then?.captions ?? [])];
-  const story = useScrollStory(beatStep(allCaptions.length));
+  const steps = then?.steps ?? [];
+  const story = useScrollStory(beatStep(captions.length + steps.length));
   const { ref, between, drift } = story;
   const s = beatStep(0);
-  const thenStep = beatStep(captions.length);
-  const docsStep = beatStep(captions.length + (then?.documentsAt ?? 0));
+  const thenStep = (i: number) => beatStep(captions.length + i);
 
-  const storyCaptions: StoryCaption[] = allCaptions.map((node, i) => ({
-    node,
-    step: beatStep(i),
-    start: 0.15,
-  }));
+  const storyCaptions: StoryCaption[] = [
+    ...captions.map((node, i) => ({ node, step: beatStep(i), start: 0.15 })),
+    ...steps.flatMap((st, i) =>
+      st.caption === undefined ? [] : [{ node: st.caption, step: thenStep(i), start: 0.15 }],
+    ),
+  ];
 
   const mapIn = between(s, 0, s, 0.35);
   const oregonIn = between(s, 0.3, s, 0.5);
   const calloutIn = (i: number) => between(s, 0.45 + i * 0.15, s, 0.65 + i * 0.15);
-  const mapOut = then ? between(thenStep, 0, thenStep, 0.25) : 0;
-  const docIn = (i: number) =>
-    then ? between(docsStep, 0.15 + i * 0.08, docsStep, 0.4 + i * 0.08) : 0;
+  const mapOut = then ? between(thenStep(0), 0, thenStep(0), 0.25) : 0;
+
+  // How present each later step's visual is. Neighbors cross-fade, so a
+  // visual shared by consecutive steps stays put.
+  const stepWeight = steps.map((_, i) => {
+    const fadeIn = between(thenStep(i), 0, thenStep(i), 0.25);
+    const fadeOut = i < steps.length - 1 ? between(thenStep(i + 1), 0, thenStep(i + 1), 0.25) : 0;
+    return fadeIn * (1 - fadeOut);
+  });
+  const visual = (kind: "documents" | "jurisdictions") => {
+    const present = Math.min(
+      1,
+      steps.reduce((sum, st, i) => sum + (st.show === kind ? stepWeight[i] : 0), 0),
+    );
+    const first = thenStep(Math.max(0, steps.findIndex((st) => st.show === kind)));
+    // Items arrive staggered on the visual's first step, then follow it as a whole.
+    return (i: number) => between(first, 0.15 + i * 0.08, first, 0.4 + i * 0.08) * present;
+  };
+  const docIn = visual("documents");
+  const placeIn = visual("jurisdictions");
 
   return (
     <section id={id} ref={ref} className="relative" style={{ height: story.height }}>
@@ -133,7 +163,7 @@ export function UsMapSection({ id, intros, captions, label, then }: Props) {
             })}
           </svg>
 
-          {then && (
+          {then?.documents && (
             <ul className="grid w-full max-w-4xl grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4 sm:gap-6">
               {then.documents.map((doc, i) => {
                 const t = docIn(i);
@@ -146,6 +176,26 @@ export function UsMapSection({ id, intros, captions, label, then }: Props) {
                     <Paper symbol={doc.symbol} />
                     <span className="text-base leading-tight font-bold text-balance text-ink sm:text-lg">
                       {doc.label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {then?.jurisdictions && (
+            <ul className="grid w-full max-w-5xl grid-cols-5 gap-2 sm:gap-6">
+              {then.jurisdictions.map((j, i) => {
+                const t = placeIn(i);
+                return (
+                  <li
+                    key={j.label}
+                    className="flex flex-col items-center gap-3 text-center"
+                    style={{ opacity: t, transform: drift((1 - t) * 24) }}
+                  >
+                    <Outline shape={j.shape} />
+                    <span className="text-xs leading-tight font-bold text-balance text-ink sm:text-lg">
+                      {j.label}
                     </span>
                   </li>
                 );
@@ -220,6 +270,42 @@ function Paper({ symbol }: { symbol: string }) {
         {symbol}
       </text>
       <path d="M18 76h64M18 87h64M18 98h40" stroke="#cdbf9b" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** A government's outline, drawn in flag green and sized to fit its box. */
+function Outline({ shape }: { shape: Jurisdiction["shape"] }) {
+  const common = {
+    fill: "var(--color-flag-green)",
+    stroke: "var(--color-flag-green)",
+    strokeLinejoin: "round" as const,
+  };
+  const views: Record<Jurisdiction["shape"], [string, ReactNode]> = {
+    us: [
+      `0 0 ${usWidth} ${usHeight}`,
+      <>
+        <path d={statesPath} {...common} strokeWidth="2" />
+        <path d={oregonPath} {...common} strokeWidth="2" />
+      </>,
+    ],
+    oregon: [oregonViewBox, <path d={oregonPath} {...common} strokeWidth="0.5" />],
+    metro: [metroViewBox, <path d={metroPath} {...common} fillRule="evenodd" strokeWidth="2" />],
+    county: [countyViewBox, <path d={countyPath} {...common} strokeWidth="2" />],
+    // The four council districts, filled alike so they read as one city.
+    portland: [
+      districtsViewBox,
+      <>
+        {districts.map((d) => (
+          <path key={d.number} d={d.d} {...common} fillRule="evenodd" strokeWidth="2" />
+        ))}
+      </>,
+    ],
+  };
+  const [viewBox, body] = views[shape];
+  return (
+    <svg aria-hidden="true" viewBox={viewBox} className="h-14 w-full sm:h-28">
+      {body}
     </svg>
   );
 }

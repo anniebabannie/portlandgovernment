@@ -9,6 +9,9 @@ import { DistrictMapSection } from "../components/district-map-section";
 import { DivisionTreeSection, type Division } from "../components/division-tree-section";
 import { MetroSection } from "../components/metro-section";
 import { RankedChoiceSection } from "../components/ranked-choice-section";
+import { PamphletSection } from "../components/pamphlet-section";
+import { ActionSection } from "../components/action-section";
+import { PortlandFlag } from "../components/portland-flag";
 import { VotingSection, type Jurisdiction } from "../components/voting-section";
 
 // Colors per kind of branch, so the federal and city trees line up.
@@ -507,6 +510,22 @@ export default function Home() {
             Government
           </span>
         </h1>
+        <p className="mt-6 inline-flex items-center gap-2 rounded-full border-2 border-flag-gold px-4 py-1.5 text-xs font-bold tracking-[0.2em] text-flag-green uppercase sm:mt-8 sm:gap-2.5 sm:px-5 sm:py-2 sm:text-sm">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-4 sm:size-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+          </svg>
+          In 10 minutes or less
+        </p>
 
         {/* Gold and blue bars echo the stripes on the city flag. */}
         <div aria-hidden="true" className="mt-10 flex w-48 flex-col gap-2 sm:w-64">
@@ -1384,6 +1403,78 @@ export default function Home() {
               </>
             ),
           },
+        ]}
+      />
+
+      <PamphletSection
+        id="pamphlet"
+        intros={[]}
+        dropBoxLabel="A person slides their ballot envelope into the slot of an Official Ballot Drop Box."
+        ballotLabel="A Multnomah County ballot return envelope, marked Official Voter Ballot Inside, with an address window and the Official Election Mail emblem."
+        label="An Oregon Voters' Pamphlet for the November 3, 2026 general election, with the Oregon Pioneer statue on its cover."
+        steps={[
+          {
+            caption: (
+              <>
+                You can learn all about the candidates and measures in the{" "}
+                <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
+                  Voter Pamphlet
+                </span>{" "}
+                that you receive in the mail.
+              </>
+            ),
+          },
+          {
+            // Tilts the pamphlet aside to show the ballot envelope.
+            ballot: true,
+            caption: (
+              <>
+                You'll also receive your <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">official ballot</span> in the mail, as
+                Oregon primarily conducts elections by mail.
+              </>
+            ),
+          },
+          {
+            dropBox: true,
+            caption: (
+              <>
+                You can find your nearest ballot drop box{" "}
+                <a
+                  href="https://multco.us/info/official-ballot-drop-sites"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-flag-green hover:text-flag-green/80 focus-visible:rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-flag-green"
+                >
+                  here
+                  <span className="sr-only">: Multnomah County's official ballot drop sites (opens in a new tab)</span>
+                </a>.
+              </>
+            ),
+          },
+          {
+            caption: (
+              <>
+                Lastly, make sure you're registered to vote!
+              </>
+            ),
+            sub: <>Registration must be completed by the 21st day before Election Day.</>,
+          },
+        ]}
+      />
+
+      <ActionSection
+        id="get-involved"
+        intros={[
+          "Wow. You've learned a lot today.",
+          "How are you feeling?",
+          "Motivated? A little overwhelmed?",
+          "That's normal. What matters is that you're learning.",
+          "Learning is the first step to getting involved in local politics.",
+          "So, from one Portlander to another: thank you.",
+          <>
+            <PortlandFlag className="mx-auto mb-8 w-44 sm:mb-10 sm:w-64" />
+            Let's make this city the best it can be.
+          </>,
         ]}
       />
     </main>

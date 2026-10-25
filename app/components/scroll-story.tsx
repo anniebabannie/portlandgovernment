@@ -40,16 +40,22 @@ export function drawIn(t: number) {
   };
 }
 
-/** Full-screen lines, one per step starting at step 0. */
+/**
+ * Full-screen lines, one per step starting at step 0. Each fades out as the
+ * next step arrives, except the last when `holdLast` is set (for a section
+ * with nothing after its intros).
+ */
 export function StoryIntros({
   story: { between, drift },
   intros,
+  holdLast = false,
 }: {
   story: ScrollStory;
   intros: ReactNode[];
+  holdLast?: boolean;
 }) {
   return intros.map((line, k) => {
-    const leaving = between(k, 0.65, k, 0.95);
+    const leaving = holdLast && k === intros.length - 1 ? 0 : between(k, 0.65, k, 0.95);
     const o = (k === 0 ? 1 : between(k, 0, k, 0.3)) * (1 - leaving);
     return (
       <p

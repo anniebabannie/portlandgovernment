@@ -8,7 +8,7 @@ import { CountyMapSection } from "../components/county-map-section";
 import { DistrictMapSection } from "../components/district-map-section";
 import { DivisionTreeSection, type Division } from "../components/division-tree-section";
 import { MetroSection } from "../components/metro-section";
-import { UsMapSection } from "../components/us-map-section";
+import { VotingSection, type Jurisdiction } from "../components/voting-section";
 
 // Colors per kind of branch, so the federal and city trees line up.
 const executive = { fill: "var(--color-flag-blue)", text: "var(--color-ink)" };
@@ -170,6 +170,12 @@ const countyOffices: Office[] = [
     url: countyBoard,
   },
   {
+    name: "County Commissioners",
+    summary:
+      "Four commissioners, each elected from a district. Together with the Chair, they make up the Board of County Commissioners.",
+    url: countyBoard,
+  },
+  {
     name: "Sheriff",
     summary:
       "Runs the Multnomah County Sheriff's Office, which provides corrections (including the county jails), civil, and public safety services.",
@@ -182,16 +188,275 @@ const countyOffices: Office[] = [
     url: "https://multco.us/elected/auditors-office",
   },
   {
-    name: "County Commissioners",
-    summary:
-      "Four commissioners, each elected from a district. Together with the Chair, they make up the Board of County Commissioners.",
-    url: countyBoard,
-  },
-  {
     name: "District Attorney",
     summary:
       "Prosecutes crimes in Multnomah County. Though elected by county voters, the District Attorney is a state office.",
     url: "https://www.mcda.us",
+  },
+];
+
+// What sits under each county office. Department summaries are condensed
+// from multco.us/departments; the Sheriff's divisions from its FY 2027
+// budget; the DA's divisions from mcda.us.
+const countyDepartmentsPage = "https://multco.us/departments";
+const countyDepartments: Office[] = [
+  {
+    name: "Health",
+    summary: "Works with communities to promote and protect the health of everyone in the county.",
+    url: countyDepartmentsPage,
+  },
+  {
+    name: "Human Services",
+    summary:
+      "Supports the county's most vulnerable residents, including older adults, people with disabilities, and veterans.",
+    url: countyDepartmentsPage,
+  },
+  {
+    name: "Homeless Services",
+    summary: "Coordinates funding to address homelessness in Portland and Multnomah County.",
+    url: countyDepartmentsPage,
+  },
+  {
+    name: "Community Justice",
+    summary:
+      "Works with people at risk of crime, accused of crimes, detained, or on parole and probation, including young people.",
+    url: countyDepartmentsPage,
+  },
+  {
+    name: "Community Services",
+    summary:
+      "Runs Animal Services, Elections, Land Use Planning, and county Transportation, including the Willamette River bridges.",
+    url: countyDepartmentsPage,
+  },
+  {
+    name: "County Assets",
+    summary: "Manages the county's technology, buildings, vehicles, and records.",
+    url: countyDepartmentsPage,
+  },
+  {
+    name: "County Management",
+    summary:
+      "Runs the county's administrative backbone: budget, finance, human resources, and property assessment and taxation.",
+    url: countyDepartmentsPage,
+  },
+  {
+    name: "Library",
+    summary: "Runs Multnomah County Library and its 19 neighborhood libraries.",
+    url: countyDepartmentsPage,
+  },
+];
+
+const sheriffPage = "https://www.mcso.us/about-mcso";
+const sheriffDivisions: Office[] = [
+  {
+    name: "Corrections",
+    summary:
+      "Runs the county's two jails, the Multnomah County Detention Center and Inverness Jail, plus a pretrial services program.",
+    url: sheriffPage,
+  },
+  {
+    name: "Law Enforcement",
+    summary:
+      "Patrols unincorporated areas, the cities of Troutdale, Fairview, Wood Village, and Maywood Park, and more than 100 miles of waterways.",
+    url: sheriffPage,
+  },
+  {
+    name: "Agency Services",
+    summary:
+      "Provides security for the jails and courthouses, serves the courts, transports people in custody, and keeps records.",
+    url: sheriffPage,
+  },
+  {
+    name: "Business Services",
+    summary: "Handles the office's budget, technology, planning and research, and training.",
+    url: sheriffPage,
+  },
+];
+
+const countyAuditorPage = "https://multco.us/elected/auditors-office";
+const countyAuditorUnits: Office[] = [
+  {
+    name: "Performance Audits",
+    summary: "Independently examines county programs and recommends ways to improve them.",
+    url: countyAuditorPage,
+  },
+  {
+    name: "Good Government Hotline",
+    summary:
+      "A place for county employees and residents to report suspected fraud, abuse of position, and misuse of county resources.",
+    url: countyAuditorPage,
+  },
+  {
+    name: "Ombudsperson",
+    summary: "Helps people resolve issues with a county program or department.",
+    url: countyAuditorPage,
+  },
+];
+
+const daDivisionsPage = "https://www.mcda.us/index.php/about-the-da/departments";
+const daDivisions: Office[] = [
+  {
+    name: "Violent Crimes",
+    summary:
+      "Prosecutes homicide, assault, sex crimes, robbery, burglary, gun crimes, and vehicular homicide.",
+    url: daDivisionsPage,
+  },
+  {
+    name: "Family Justice & Community Impact",
+    summary: "Handles domestic violence, child abuse, juvenile, and misdemeanor cases.",
+    url: daDivisionsPage,
+  },
+  {
+    name: "Diversion & Strategic Prosecution",
+    summary:
+      "Handles diversion programs, pretrial matters, property and drug crimes, and child support enforcement.",
+    url: daDivisionsPage,
+  },
+  {
+    name: "Investigations",
+    summary:
+      "District Attorney investigators who follow up on cases police submit and get them ready for trial.",
+    url: daDivisionsPage,
+  },
+];
+
+// Offices voters elect in Metro's region.
+const metroCouncil = "https://www.oregonmetro.gov/about-metro/metro-council";
+const metroOffices: Office[] = [
+  {
+    name: "Metro Council President",
+    summary: "Elected regionwide. Leads the seven-member Metro Council.",
+    url: metroCouncil,
+  },
+  {
+    name: "Metro Councilors",
+    summary:
+      "Six councilors, each elected from a district every four years in nonpartisan races. With the president, they make up the Metro Council.",
+    url: metroCouncil,
+  },
+  {
+    name: "Metro Auditor",
+    summary: "Elected regionwide. Audits Metro's programs and reports on its finances.",
+    url: "https://www.oregonmetro.gov/about-metro/metro-auditor",
+  },
+];
+
+// Metro's work, per oregonmetro.gov's "How Metro works." The Council
+// appoints a Chief Operating Officer to run it.
+const howMetroWorks = "https://www.oregonmetro.gov/how-metro-works";
+const metroWork: Office[] = [
+  {
+    name: "Housing & Homeless Services",
+    summary:
+      "Funds affordable housing and supportive services for people experiencing homelessness across the region, through voter-approved measures.",
+    url: howMetroWorks,
+  },
+  {
+    name: "Parks & Nature",
+    summary: "Manages regional parks, natural areas, and trails.",
+    url: howMetroWorks,
+  },
+  {
+    name: "Garbage & Recycling",
+    summary:
+      "Plans the region's garbage and recycling system and runs its transfer stations and hazardous waste facilities.",
+    url: howMetroWorks,
+  },
+  {
+    name: "Land Use & Transportation",
+    summary:
+      "Manages the region's urban growth boundary and plans regional transportation.",
+    url: howMetroWorks,
+  },
+  {
+    name: "Venues",
+    summary:
+      "Runs the Oregon Convention Center, the Oregon Zoo, Portland'5 Centers for the Arts, and the Portland Expo Center.",
+    url: howMetroWorks,
+  },
+];
+
+const metroAuditorPage = "https://www.oregonmetro.gov/about-metro/metro-auditor";
+const metroAuditorWork: Office[] = [
+  {
+    name: "Performance Audits",
+    summary:
+      "Reviews Metro's operations to improve their efficiency, effectiveness, and equity.",
+    url: metroAuditorPage,
+  },
+  {
+    name: "Financial Statements",
+    summary: "Oversees Metro's annual financial statements.",
+    url: metroAuditorPage,
+  },
+  {
+    name: "Accountability Hotline",
+    summary:
+      "Gives employees and the public a way to report fraud, waste, or abuse of resources or position at Metro.",
+    url: metroAuditorPage,
+  },
+];
+
+// What voters elect at each level of government.
+const electionLevels: Jurisdiction[] = [
+  {
+    level: "Federal",
+    label: "United States",
+    shape: "us",
+    positions: ["President and Vice President", "U.S. Senator", "U.S. Representative"],
+  },
+  {
+    level: "State",
+    label: "Oregon",
+    shape: "oregon",
+    positions: [
+      "Governor",
+      "Secretary of State",
+      "State Treasurer",
+      "Attorney General",
+      "Labor Commissioner",
+      "State Senator",
+      "State Representative",
+      "Oregon Supreme Court judges",
+      "Oregon Court of Appeals judges",
+      "Oregon Tax Court judge",
+    ],
+  },
+  {
+    level: "Regional",
+    label: "Metro",
+    shape: "metro",
+    positions: ["Metro Council President", "Metro Councilor", "Metro Auditor"],
+  },
+  {
+    level: "County",
+    label: "Multnomah",
+    shape: "county",
+    positions: [
+      "County Chair",
+      "County Commissioner",
+      "Sheriff",
+      "District Attorney",
+      "County Auditor",
+      "Circuit Court judges*",
+    ],
+  },
+  {
+    level: "City",
+    label: "Portland",
+    shape: "portland",
+    positions: ["Mayor", "City Councilors", "City Auditor"],
+  },
+  {
+    level: "Special",
+    label: "Districts",
+    shape: "special",
+    positions: [
+      "School board",
+      "Community college board",
+      "Soil and water conservation district directors",
+      "Water or utility district directors",
+    ],
   },
 ];
 
@@ -258,7 +523,7 @@ export default function Home() {
         label="The Constitution, branching into the Executive branch (the President), the Legislative branch (Congress), and the Judicial branch (the Supreme Court), with arrows between each pair showing checks and balances."
         docCaption={
           <>
-            The federal government derives its powers from (and is limited by)
+            The federal government derives its powers from, and is limited by,
             the <span className="text-flag-green">Constitution</span>.
           </>
         }
@@ -286,7 +551,7 @@ export default function Home() {
       <BranchTreeSection
         id="city"
         intros={[
-          "How does Portland's municipal government compare?",
+          "How does Portland's government compare?",
           "Portland, too, has three main branches, but they operate a little differently.",
         ]}
         source="State of Oregon"
@@ -385,8 +650,8 @@ export default function Home() {
             show: [],
             caption: (
               <>
-                The <span className="text-flag-blue-dark">Mayor</span> is the
-                office that runs the day-to-day stuff.
+                The <span className="text-flag-blue-dark">Mayor</span> leads the
+                city's executive branch.
               </>
             ),
           },
@@ -394,9 +659,8 @@ export default function Home() {
             show: [],
             caption: (
               <>
-                They're responsible for directing the budget, carrying out the
-                laws City Council passes, and overseeing city bureaus like
-                Police, Water, and Parks.
+                They propose the budget, carry out Council's laws, and oversee
+                bureaus like Police, Water, and Parks.
               </>
             ),
           },
@@ -405,8 +669,7 @@ export default function Home() {
             caption: (
               <>
                 The <span className="text-flag-blue-dark">Mayor</span> appoints
-                three key positions: the City Administrator, the Police Chief,
-                and the City Attorney.
+                3 key positions:
               </>
             ),
           },
@@ -415,8 +678,8 @@ export default function Home() {
             highlight: "admin",
             caption: (
               <>
-                The City Administrator manages the day-to-day operations across
-                city bureaus.
+                The City Administrator runs the day-to-day operations of city
+                bureaus on the Mayor's behalf.
               </>
             ),
           },
@@ -424,7 +687,22 @@ export default function Home() {
             show: ["admin", "chief", "attorney"],
             highlight: "admin",
             group: "service-areas",
-            caption: <>The City Administrator oversees four service areas.</>,
+            caption: <>The City Administrator oversees 4 service areas.</>,
+          },
+          {
+            show: ["admin", "chief", "attorney"],
+            highlight: "admin",
+            group: "service-areas",
+            caption: (
+              <>
+                Each service area is a group of{" "}
+                <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
+                  bureaus
+                </span>
+                : the departments that do the actual work, like Water, Housing,
+                or Fire & Rescue.
+              </>
+            ),
           },
           {
             show: ["admin", "chief", "attorney"],
@@ -442,7 +720,7 @@ export default function Home() {
             show: ["admin", "chief", "attorney"],
             subs: ["bureau"],
             highlight: "chief",
-            caption: <>Here's where it gets confusing:</>,
+            caption: <>But here's a little quirk:</>,
           },
           {
             show: ["admin", "chief", "attorney"],
@@ -623,11 +901,101 @@ export default function Home() {
         tree={{
           root: { name: "Voters", fill: "#cfccc4", text: "var(--color-ink)" },
           offices: countyOffices,
+          groups: [
+            { id: "departments", under: "County Chair", offices: countyDepartments },
+            { id: "sheriff", under: "Sheriff", offices: sheriffDivisions },
+            { id: "county-auditor", under: "County Auditor", offices: countyAuditorUnits },
+            { id: "da", under: "District Attorney", offices: daDivisions },
+          ],
           label:
-            "Voters elect five county offices: the County Chair, the Sheriff, the County Auditor, the County Commissioners, and the District Attorney.",
-          captions: [
-            <>Residents vote on these five main offices:</>,
-            <>Click each to learn more, or keep scrolling.</>,
+            "Voters elect five county offices: the County Chair, the County Commissioners, the Sheriff, the County Auditor, and the District Attorney. The Chair runs eight county departments: Health, Human Services, Homeless Services, Community Justice, Community Services, County Assets, County Management, and the Library. The Sheriff's Office has four divisions: Corrections, Law Enforcement, Agency Services, and Business Services. The County Auditor's Office runs Performance Audits, the Good Government Hotline, and the Ombudsperson. The District Attorney's Office has four divisions: Violent Crimes, Family Justice & Community Impact, Diversion & Strategic Prosecution, and Investigations.",
+          beats: [
+            { caption: <>Residents vote on these five main offices:</> },
+            {
+              highlight: ["County Chair"],
+              caption: (
+                <>
+                  The County Chair is the county's chief executive.
+                </>
+              ),
+            },
+            {
+              highlight: ["County Commissioners"],
+              caption: (
+                <>
+                  The four County Commissioners each represent a district of
+                  the county.
+                </>
+              ),
+            },
+            {
+              highlight: ["County Commissioners", "County Chair"],
+              bracket: {
+                names: ["County Chair", "County Commissioners"],
+                label: "Board of County Commissioners",
+              },
+              caption: (
+                <>
+                  Together with the Chair, they make up the <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">Board of County Commissioners</span>
+                  , which passes county laws and adopts the budget.
+                </>
+              ),
+            },
+            {
+              highlight: ["County Chair"],
+              group: "departments",
+              caption: (
+                <>
+                  The Chair runs the county's departments and picks who leads
+                  each one, with the Board's approval.
+                </>
+              ),
+            },
+            {
+              highlight: ["Sheriff"],
+              caption: (
+                <>
+                  The Sheriff runs the county jails and patrols the parts of
+                  the county without their own police.
+                </>
+              ),
+            },
+            {
+              highlight: ["Sheriff"],
+              group: "sheriff",
+              caption: <>The Sheriff's Office has four divisions:</>,
+              sub: <>Click a department to learn more, or keep scrolling.</>,
+            },
+            {
+              highlight: ["County Auditor"],
+              caption: (
+                <>
+                  The County Auditor checks how well county programs work, much
+                  like Portland's city Auditor.
+                </>
+              ),
+            },
+            {
+              highlight: ["County Auditor"],
+              group: "county-auditor",
+              caption: <>The Auditor's Office has three main parts:</>,
+              sub: <>Click a department to learn more, or keep scrolling.</>,
+            },
+            {
+              highlight: ["District Attorney"],
+              caption: (
+                <>
+                  The District Attorney (DA) prosecutes crimes committed in the
+                  county.
+                </>
+              ),
+            },
+            {
+              highlight: ["District Attorney"],
+              group: "da",
+              caption: <>The DA's Office has four divisions:</>,
+              sub: <>Click any office to learn more, or keep scrolling.</>
+            },
           ],
         }}
       />
@@ -672,72 +1040,160 @@ export default function Home() {
           </>,
         ]}
         metroAreaAt={5}
-      />
-
-      <UsMapSection
-        id="voting"
-        intros={[
-          <>
-            Finally, let's talk about{" "}
-            <span className="underline decoration-flag-gold decoration-[5px] underline-offset-[10px]">
-              voting
-            </span>
-            .
-          </>,
-          <>
-          Your ballot likely lists <span className="underline decoration-flag-gold decoration-[5px] underline-offset-[10px]">way more</span> more positions than what we've covered.
-          </>,
-          "Yikes, am I right?",
-          "Let's simplify things.",
-        ]}
-        label="Map of the United States with Oregon highlighted. A star marks Washington, DC, labeled US House. A star marks Salem, Oregon, labeled Oregon House and Senate."
-        captions={[
-          <>
-            Every November, in{" "}
-            <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
-              even
-            </span>{" "}
-            years, we vote on: US House Reps, Oregon House Reps, Oregon Senate.
-          </>,
-        ]}
-        then={{
-          steps: [
+        tree={{
+          at: 5,
+          root: { name: "Voters", fill: "#cfccc4", text: "var(--color-ink)" },
+          offices: metroOffices,
+          groups: [
             {
-              show: "documents",
+              id: "metro-work",
+              under: ["Metro Council President", "Metro Councilors"],
+              offices: metroWork,
+            },
+            { id: "metro-auditor", under: "Metro Auditor", offices: metroAuditorWork },
+          ],
+          districtsLabel:
+            "Map of Metro's six council districts, which span parts of Washington, Multnomah, and Clackamas counties. Portland, outlined, falls mostly in Districts 5 and 6, with East Portland in District 1 and a sliver of the south in District 2.",
+          label:
+            "Voters elect three kinds of Metro positions: the Metro Council President, Metro Councilors, and the Metro Auditor. Together, the President and Councilors make up the Metro Council, which appoints a Chief Operating Officer to run Metro's work in five areas: Housing & Homeless Services, Parks & Nature, Garbage & Recycling, Land Use & Transportation, and Venues. The Metro Auditor runs Performance Audits, oversees Metro's Financial Statements, and runs the Accountability Hotline.",
+          beats: [
+            {
               caption: (
                 <>
-                  This is also when we vote on{" "}
-                  <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
-                    measures
-                  </span>
-                  : rules that voters decide directly. If passed, these can become
-                  any of the following:
+                  Every four years, voters elect the following{" "}
+                  <span className="text-flag-blue-dark">Metro</span> positions:
                 </>
               ),
             },
             {
+              highlight: ["Metro Council President"],
               caption: (
                 <>
-                  Elections happen on two-year and staggered four-year cycles.
+                  The Council President is elected by voters across the whole
+                  region, and leads the Council.
                 </>
               ),
             },
-            { show: "jurisdictions" },
-          ],
-          documents: [
-            { label: "Laws", symbol: "§" },
-            { label: "Charter or constitutional amendments", symbol: "+" },
-            { label: "Tax levies", symbol: "%" },
-            { label: "Bonds", symbol: "$" },
-          ],
-          jurisdictions: [
-            { label: "United States", shape: "us" },
-            { label: "Oregon", shape: "oregon" },
-            { label: "Metro", shape: "metro" },
-            { label: "Multnomah County", shape: "county" },
-            { label: "City of Portland", shape: "portland" },
+            {
+              highlight: ["Metro Councilors"],
+              figure: "districts",
+              caption: <>The six Metro Councilors each represent a district.</>,
+            },
+            {
+              highlight: ["Metro Councilors"],
+              figure: "districts",
+              caption: (
+                <>
+                  These are <em>not</em> the same districts as Portland's City
+                  Council.
+                </>
+              ),
+            },
+            {
+              highlight: ["Metro Councilors"],
+              figure: "districts",
+              search: true,
+              caption: <>Search for your Metro district, or keep scrolling.</>,
+            },
+            {
+              highlight: ["Metro Council President", "Metro Councilors"],
+              bracket: {
+                names: ["Metro Council President", "Metro Councilors"],
+                label: "Metro Council",
+              },
+              caption: (
+                <>
+                  Together, these offices make up the <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">Metro Council</span>, which sets{" "}
+                  <span className="text-flag-blue-dark">Metro</span>'s policies
+                  and budget.
+                </>
+              ),
+            },
+            {
+              highlight: ["Metro Council President", "Metro Councilors"],
+              bracket: {
+                names: ["Metro Council President", "Metro Councilors"],
+                label: "Metro Council",
+              },
+              group: "metro-work",
+              caption: (
+                <>
+                  The Council appoints a Chief Operating Officer to run{" "}
+                  <span className="text-flag-blue-dark">Metro</span>'s work in
+                  five areas:
+                </>
+              ),
+              sub: <>Click an area to learn more, or keep scrolling.</>,
+            },
+            {
+              highlight: ["Metro Auditor"],
+              group: "metro-auditor",
+              caption: <>The Metro Auditor's office checks how well <span className="text-flag-blue-dark">Metro</span> is doing its job:</>,
+            },
+            {
+              highlight: ["Metro Auditor"],
+              group: "metro-auditor",
+              caption: <>It's basically the <span className="text-flag-blue-dark">Metro</span>'s version of Portland's city Auditor.</>,
+            },
           ],
         }}
+      />
+
+      <VotingSection
+        id="voting"
+        intros={[
+          "Now, why does any of this matter?",
+          <>
+            Because{" "}
+            <span className="underline decoration-flag-gold decoration-[5px] underline-offset-[10px]">
+              voting
+            </span>{" "}
+            matters.
+          </>,
+          "But let's face it: local elections can feel complicated.",
+          <>
+          Your ballot likely lists <span className="underline decoration-flag-gold decoration-[5px] underline-offset-[10px]">way more</span> positions than what we've covered.
+          </>,
+          "Let's simplify things.",
+          <>
+            Elections happen <span className="underline decoration-flag-gold decoration-[5px] underline-offset-[10px]">every year</span>.
+          </>
+        ]}
+        label="Map of the United States with Oregon highlighted. A star marks Washington, DC, labeled US House. A star marks Salem, Oregon, labeled Oregon House and Senate."
+        steps={[
+          {
+            show: "jurisdictions",
+            caption: (
+              <>
+                Your ballot will have candidates for <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">positions</span> whose terms are ending or have vacant seats.
+              </>
+            ),
+          },
+          {
+            show: "documents",
+            caption: (
+              <>
+                Your ballot will also have {" "}
+                <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
+                  measures
+                </span>
+                : rules that voters decide directly.
+              </>
+            ),
+          },
+          {
+            show: "documents",
+            caption: <>If passed, these can become any of the following:</>,
+          },
+        ]}
+        documents={[
+          { label: "Laws", symbol: "§" },
+          { label: "Charter or constitutional amendments", symbol: "+" },
+          { label: "Tax levies", symbol: "%" },
+          { label: "Bonds", symbol: "$" },
+        ]}
+        jurisdictions={electionLevels}
+        jurisdictionsNote="* State judges, elected by county voters."
       />
     </main>
   );

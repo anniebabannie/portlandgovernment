@@ -10,6 +10,8 @@ export type Office = {
   bureaus?: string[];
   /** Smaller programs that sit outside a bureau. */
   programs?: string[];
+  /** Offices voters elect (for a level of government). */
+  positions?: string[];
   /** Its official page. */
   url?: string;
 };
@@ -59,6 +61,7 @@ export function useOfficeDialog(id: string, titleClass = "text-flag-blue-dark") 
           {open.summary && <p className="mt-4 text-lg">{open.summary}</p>}
           {open.bureaus && <OfficeList title="Bureaus" items={open.bureaus} />}
           {open.programs && <OfficeList title="Programs" items={open.programs} />}
+          {open.positions && <OfficeList title="On the ballot" items={open.positions} />}
           {open.url && (
             // Opens in a new tab so readers keep their place in the walkthrough.
             <a

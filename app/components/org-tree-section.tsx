@@ -22,6 +22,8 @@ export type OrgSub = Branch & { id: string; under: string };
 
 export type OrgBeat = {
   caption: ReactNode;
+  /** Smaller, muted line under the caption, e.g. a hint to click. */
+  sub?: ReactNode;
   /** Ids of the reports on screen during this beat. */
   show: string[];
   /**
@@ -170,6 +172,7 @@ export function OrgTreeSection({
 
   const captions: StoryCaption[] = beats.map((b, i) => ({
     node: b.caption,
+    sub: b.sub,
     step: beatStep(i),
     start: 0.15,
   }));

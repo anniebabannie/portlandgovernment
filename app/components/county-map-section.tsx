@@ -6,7 +6,9 @@ import {
   countyPath,
 } from "../content/multnomah-county";
 import type { Branch } from "./branch-tree-section";
-import { FanTree } from "./fan-tree";
+import { FanTree, fanTreeBeats, type FanGroupSpec, type TreeBeat } from "./fan-tree";
+
+export type { TreeBeat } from "./fan-tree";
 import { useOfficeDialog, type Office } from "./office-dialog";
 import {
   drawIn,
@@ -26,9 +28,16 @@ type Props = {
   label: string;
   /**
    * A tree that replaces the map after its captions: a root fanning out to
-   * clickable offices, with one caption per further scroll step.
+   * clickable offices, with one beat per further scroll step.
    */
-  tree?: { root: Branch; offices: Office[]; captions: ReactNode[]; label: string };
+  tree?: {
+    root: Branch;
+    offices: Office[];
+    /** Offices under offices, each shown by the beats that name it. */
+    groups?: FanGroupSpec[];
+    beats: TreeBeat[];
+    label: string;
+  };
 };
 
 const W = 1000;
@@ -39,7 +48,8 @@ const W = 1000;
  */
 export function CountyMapSection({ id, intros, highlight, captions, label, tree }: Props) {
   const beatStep = (b: number) => intros.length + b;
-  const allCaptions = [...captions, ...(tree?.captions ?? [])];
+  const beats = tree?.beats ?? [];
+  const allCaptions = [...captions, ...beats.map((b) => b.caption)];
   const story = useScrollStory(beatStep(allCaptions.length));
   const { ref, between, drift } = story;
   const s = beatStep(0);
@@ -48,6 +58,7 @@ export function CountyMapSection({ id, intros, highlight, captions, label, tree 
 
   const storyCaptions: StoryCaption[] = allCaptions.map((node, i) => ({
     node,
+    sub: beats[i - captions.length]?.sub,
     step: beatStep(i),
     start: 0.15,
   }));
@@ -55,6 +66,8 @@ export function CountyMapSection({ id, intros, highlight, captions, label, tree 
   // The map gives way to the tree at the first tree step.
   const mapOut = tree ? between(treeStep, 0, treeStep, 0.25) : 0;
   const treeIn = tree ? between(treeStep, 0.15, treeStep, 0.95) : 0;
+
+  const { focus, groups, brackets } = fanTreeBeats(beats, tree?.groups ?? [], treeStep, between);
 
   // Outline draws, then the county fills, then the cities and their labels.
   const outline = between(s, 0, s, 0.35);
@@ -101,6 +114,9 @@ export function CountyMapSection({ id, intros, highlight, captions, label, tree 
                 onSelect={showOffice}
                 label={tree.label}
                 width="min(100%, 32rem)"
+                focus={focus}
+                groups={groups}
+                brackets={brackets}
               />
             </div>
           )}

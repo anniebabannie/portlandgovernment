@@ -19,6 +19,8 @@ export type Division = Office & {
 
 export type DivisionBeat = {
   caption: ReactNode;
+  /** Smaller, muted line under the caption, e.g. a hint to click. */
+  sub?: ReactNode;
   /** Show the divisions under the root. */
   divisions?: boolean;
 };
@@ -63,6 +65,7 @@ export function DivisionTreeSection({
 
   const captions: StoryCaption[] = beats.map((b, i) => ({
     node: b.caption,
+    sub: b.sub,
     step: beatStep(i),
     start: 0.15,
   }));

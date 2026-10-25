@@ -23,6 +23,8 @@ const districtFill: Record<number, string> = {
 
 export type MapBeat = {
   caption: ReactNode;
+  /** Smaller, muted line under the caption, e.g. a hint to click. */
+  sub?: ReactNode;
   /** District number to spotlight; the others dim. */
   highlight?: number;
   /** Show three councilor seats on each district. */
@@ -59,6 +61,7 @@ export function DistrictMapSection({ id, intros, beats, label }: Props) {
     ) : (
       b.caption
     ),
+    sub: b.sub,
     step: beatStep(i),
     start: 0.15,
   }));

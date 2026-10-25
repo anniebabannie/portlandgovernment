@@ -1,6 +1,11 @@
 import { useRef, useState } from "react";
 import { cn } from "../lib/cn";
-import { lookupDistrict, type DistrictLookup } from "../lib/district-lookup";
+import {
+  cityCouncilDistricts,
+  lookupDistrict,
+  type DistrictLayer,
+  type DistrictLookup,
+} from "../lib/district-lookup";
 
 type State =
   | { status: "idle" }
@@ -11,8 +16,20 @@ type State =
 /** Address box that looks up which council district an address is in. */
 export function DistrictSearch({
   onResult,
+  id = "district-address",
+  layer = cityCouncilDistricts,
+  inputLabel = "Your Portland address",
+  outside = "outside Portland city limits",
+  learnMore = { href: "https://www.portland.gov/council", text: "portland.gov/council" },
 }: {
   onResult: (result: DistrictLookup | null) => void;
+  /** Id for the address field; unique per search on the page. */
+  id?: string;
+  layer?: DistrictLayer;
+  inputLabel?: string;
+  /** Finishes "[address] is …" for an address outside the districts. */
+  outside?: string;
+  learnMore?: { href: string; text: string };
 }) {
   const [state, setState] = useState<State>({ status: "idle" });
   const pending = useRef<AbortController | null>(null);
@@ -34,7 +51,7 @@ export function DistrictSearch({
     setState({ status: "loading" });
     onResult(null);
     try {
-      const result = await lookupDistrict(query, controller.signal);
+      const result = await lookupDistrict(query, controller.signal, layer);
       setState(result);
       onResult(result);
     } catch (err) {
@@ -52,12 +69,12 @@ export function DistrictSearch({
         }}
         className="flex gap-2"
       >
-        <label htmlFor="district-address" className="sr-only">
-          Your Portland address
+        <label htmlFor={id} className="sr-only">
+          {inputLabel}
         </label>
         <input
           ref={inputRef}
-          id="district-address"
+          id={id}
           name="address"
           type="search"
           autoComplete="street-address"
@@ -82,13 +99,15 @@ export function DistrictSearch({
             </>
           )}
           {state.status === "outside" && (
-            <>{state.address} is outside Portland city limits.</>
+            <>
+              {state.address} is {outside}.
+            </>
           )}
           {state.status === "not-found" && (
             <>We couldn't find that address. Try adding the street type, like "Ave" or "St".</>
           )}
           {state.status === "error" && (
-            <>Something went wrong reaching PortlandMaps. Try again in a moment.</>
+            <>Something went wrong looking up that address. Try again in a moment.</>
           )}
         </p>
         {state.status !== "idle" && state.status !== "loading" && (
@@ -105,14 +124,14 @@ export function DistrictSearch({
       {/* Always rendered, so the page doesn't shift when a result arrives. */}
       <p
         inert={state.status !== "found"}
-        className={cn("mt-1 text-ink/80", state.status !== "found" && "invisible")}
+        className={cn("mt-1 text-center text-ink/80", state.status !== "found" && "invisible")}
       >
         Learn more at{" "}
         <a
-          href="https://www.portland.gov/council"
+          href={learnMore.href}
           className="font-semibold text-flag-green underline decoration-2 underline-offset-4 hover:decoration-flag-gold focus-visible:rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-flag-green"
         >
-          portland.gov/council
+          {learnMore.text}
         </a>
       </p>
     </div>

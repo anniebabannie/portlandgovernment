@@ -70,6 +70,8 @@ export function StoryIntros({
 
 export type StoryCaption = {
   node: ReactNode;
+  /** Smaller, muted line under the caption, e.g. a hint to click. */
+  sub?: ReactNode;
   step: number;
   /** Fraction of the step at which the caption starts fading in. */
   start: number;
@@ -104,6 +106,11 @@ export function StoryCaptions({
             style={{ opacity: o, transform: drift((1 - o) * 16) }}
           >
             {c.node}
+            {c.sub && (
+              <p className="mt-3 text-base font-medium tracking-normal text-ink/65 sm:mt-4 sm:text-xl">
+                {c.sub}
+              </p>
+            )}
           </div>
         );
       })}

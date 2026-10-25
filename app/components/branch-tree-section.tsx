@@ -18,6 +18,8 @@ export type Branch = {
 /** One scroll step after the tree is drawn. */
 export type Beat = {
   caption: ReactNode;
+  /** Smaller, muted line under the caption, e.g. a hint to click. */
+  sub?: ReactNode;
   /** Index of the branch to spotlight; the others dim. */
   highlight?: number;
   /** Show arrows between branches. */
@@ -90,7 +92,7 @@ export function BranchTreeSection({
   const captions: StoryCaption[] = [
     { node: docCaption, step: docStep, start: 0.15 },
     { node: treeCaption, step: treeStep, start: 0.65 },
-    ...beats.map((b, i) => ({ node: b.caption, step: beatStep(i), start: 0.15 })),
+    ...beats.map((b, i) => ({ node: b.caption, sub: b.sub, step: beatStep(i), start: 0.15 })),
   ];
 
   // How present each beat is right now. Neighbors cross-fade, so the

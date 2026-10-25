@@ -14,7 +14,7 @@ import {
 } from "./scroll-story";
 
 // Neighbors differ in lightness as well as hue: 1 and 4 never touch.
-const districtFill: Record<number, string> = {
+export const districtFill: Record<number, string> = {
   1: "var(--color-flag-blue)",
   2: "var(--color-flag-green)",
   3: "var(--color-flag-gold)",

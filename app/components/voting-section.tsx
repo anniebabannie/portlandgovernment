@@ -58,6 +58,9 @@ export type MeasureDocument = {
   label: string;
   /** A glyph printed on the page, like "§" or "$". */
   symbol: string;
+  /** Shown in a dialog when the document is clicked. */
+  summary?: string;
+  url?: string;
 };
 
 // Room around the map: callout cards sit above it.
@@ -198,13 +201,22 @@ export function VotingSection({
                 return (
                   <li
                     key={doc.label}
-                    className="flex flex-col items-center gap-3 text-center"
+                    className="flex justify-center"
                     style={{ opacity: t, transform: drift((1 - t) * 24) }}
                   >
-                    <Paper symbol={doc.symbol} />
-                    <span className="text-base leading-tight font-bold text-balance text-ink sm:text-lg">
-                      {doc.label}
-                    </span>
+                    <button
+                      type="button"
+                      aria-haspopup="dialog"
+                      onClick={() => showPositions({ name: doc.label, summary: doc.summary, url: doc.url })}
+                      // Not clickable (or focusable) unless it's on screen.
+                      disabled={!doc.summary || t < 0.9}
+                      className="flex cursor-pointer flex-col items-center gap-3 rounded-3xl p-3 text-center hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flag-green disabled:cursor-default disabled:hover:bg-transparent"
+                    >
+                      <Paper symbol={doc.symbol} />
+                      <span className="text-base leading-tight font-bold text-balance text-ink sm:text-lg">
+                        {doc.label}
+                      </span>
+                    </button>
                   </li>
                 );
               })}
@@ -289,7 +301,7 @@ export function VotingSection({
         </div>
       </div>
 
-      {jurisdictions && dialog}
+      {(jurisdictions || documents) && dialog}
     </section>
   );
 }

@@ -8,6 +8,7 @@ import { CountyMapSection } from "../components/county-map-section";
 import { DistrictMapSection } from "../components/district-map-section";
 import { DivisionTreeSection, type Division } from "../components/division-tree-section";
 import { MetroSection } from "../components/metro-section";
+import { RankedChoiceSection } from "../components/ranked-choice-section";
 import { VotingSection, type Jurisdiction } from "../components/voting-section";
 
 // Colors per kind of branch, so the federal and city trees line up.
@@ -318,6 +319,23 @@ const daDivisions: Office[] = [
       "District Attorney investigators who follow up on cases police submit and get them ready for trial.",
     url: daDivisionsPage,
   },
+];
+
+// A made-up ranked-choice race, for showing how the count works. Out of 100
+// votes; a candidate's count is 0 once they're eliminated.
+const rcvCandidates = [
+  { name: "Avery", color: "var(--color-flag-blue)" },
+  { name: "Maria", color: "var(--color-flag-green)" },
+  // Gold is too light for text on cream, so the name uses the dark gold.
+  { name: "Casey", color: "var(--color-flag-gold)", textColor: "var(--color-flag-gold-dark)" },
+  { name: "Drew", color: "#b8b3a7" },
+];
+const rcvRounds = [
+  [38, 30, 20, 12],
+  // Drew's 12 votes: 8 to Maria, 4 to Casey.
+  [38, 38, 24, 0],
+  // Casey's 24 votes: 9 to Avery, 15 to Maria.
+  [47, 53, 0, 0],
 ];
 
 // Offices voters elect in Metro's region.
@@ -1184,16 +1202,189 @@ export default function Home() {
           {
             show: "documents",
             caption: <>If passed, these can become any of the following:</>,
+            sub: <>Click each to learn more, or keep scrolling.</>,
           },
         ]}
         documents={[
-          { label: "Laws", symbol: "§" },
-          { label: "Charter or constitutional amendments", symbol: "+" },
-          { label: "Tax levies", symbol: "%" },
-          { label: "Bonds", symbol: "$" },
+          {
+            label: "Laws",
+            symbol: "§",
+            summary:
+              "A new law, or a change to an existing one, decided directly by voters. Depending on the measure, it could be a state law or a local one for a city, a county, or a regional government like Metro.",
+          },
+          {
+            label: "Charter or constitutional amendments",
+            symbol: "+",
+            summary:
+              "Changes to a government's founding document: the Oregon Constitution, or a local charter like Portland's, Multnomah County's, or Metro's. Portland's current form of government came from a 2022 charter amendment.",
+          },
+          {
+            label: "Tax levies",
+            symbol: "%",
+            summary:
+              "Lets a local government collect extra property taxes for a specific purpose, like parks or libraries. A levy for day-to-day costs can last up to five years; one for building projects, up to ten.",
+          },
+          {
+            label: "Bonds",
+            symbol: "$",
+            summary:
+              "Lets a government borrow money for big projects, like buildings, parks, or affordable housing, and pay it back over time, usually through property taxes.",
+          },
         ]}
         jurisdictions={electionLevels}
         jurisdictionsNote="* State judges, elected by county voters."
+      />
+
+      <RankedChoiceSection
+        id="ranked-choice"
+        intros={[
+          <>
+            Lastly, let's talk about{" "}
+            <span className="underline decoration-flag-gold decoration-[5px] underline-offset-[10px]">
+              ranked-choice voting
+            </span>
+            .
+          </>,
+        ]}
+        candidates={rcvCandidates}
+        ballot={[0, 1, 2]}
+        rankColumns={4}
+        // Not in ranked order, so the marks don't step down in a tidy diagonal.
+        ballotRows={[1, 3, 0, 2]}
+        rounds={rcvRounds}
+        ballotLabel="A sample ballot with four candidates and four ranking columns. This voter ranks Avery first, Maria second, and Casey third, and leaves Drew unranked."
+        countLabel="A sample count of 100 votes. Round 1: Avery 38, Maria 30, Casey 20, Drew 12. Drew is eliminated and those votes move to their next choices. Round 2: Avery 38, Maria 38, Casey 24. Casey is eliminated. Round 3: Maria 53, Avery 47, so Maria wins with more than half."
+        districtsLabel="Map of Portland's four City Council districts. Each district elects three councilors."
+        councilCount={{
+          candidates: [
+            { name: "Harper", color: "var(--color-flag-blue)" },
+            { name: "Jesse", color: "var(--color-flag-green)" },
+            { name: "Kai", color: "var(--color-flag-gold)" },
+            { name: "Morgan", color: "var(--color-flag-blue-dark)" },
+            { name: "Rowan", color: "#b8b3a7" },
+          ],
+          rounds: [
+            [31, 27, 18, 14, 10],
+            // Out of 100 votes, 25% + 1 is 26. Harper's 5 extra votes go
+            // 3 to Kai, 1 to Morgan, 1 to Rowan; Jesse's 1 extra goes to Kai.
+            [26, 26, 22, 15, 11],
+            // No one else reached 26, so Rowan (last) is eliminated: 5 to
+            // Kai, 6 to Morgan. Kai reaches 26, filling the third seat.
+            [26, 26, 27, 21, 0],
+          ],
+          wonAt: [1, 1, 2, -1, -1],
+          label:
+            "A sample council race, out of 100 votes. Round 1: Harper 31, Jesse 27, Kai 18, Morgan 14, Rowan 10. Harper and Jesse are over the 25% + 1 line of 26 votes. Round 2: both win a seat and keep 26 votes each; their extra votes move to their voters' next choices, bringing Kai to 22, Morgan to 15, and Rowan to 11. Round 3: no one else has 26, so Rowan is eliminated and those votes move on, bringing Kai to 27 and Morgan to 21. Kai wins the third seat.",
+        }}
+        councilLabel="Three council seats per district. Winning a seat takes 25% of the votes, plus one."
+        steps={[
+          {
+            show: "ballot",
+            caption: (
+              <>
+                Portland elects its{" "}
+                <span className="text-flag-blue-dark">Mayor</span>,{" "}
+                <span className="text-flag-green">City Council</span>, and{" "}
+                <span className="text-flag-gold-dark">Auditor</span> with{" "}
+                <span className="underline decoration-flag-gold decoration-[3px] underline-offset-[6px]">
+                  ranked-choice voting
+                </span>
+                .
+              </>
+            ),
+          },
+          {
+            show: "list",
+            caption: <>Instead of picking just one candidate, you rank them in order of preference.</>,
+          },
+          {
+            show: "ballot",
+            ranks: 1,
+            caption: <>Start with your top pick, fill out 1.</>,
+          },
+          {
+            show: "ballot",
+            ranks: 2,
+            caption: <>Then your 2nd pick, fill out 2.</>,
+          },
+          {
+            show: "ballot",
+            ranks: 3,
+            caption: <>Then your 3rd pick, fill out 3, etc.</>,
+          },
+          {
+            show: "ballot",
+            ranks: 3,
+            outline: "Drew",
+            caption: <>You can rank up to six. You don't have to rank them all.</>,
+          },
+          {
+            show: "count",
+            round: 0,
+            caption: <>First, everyone's 1st choices are counted. Anyone with more than half wins.</>,
+          },
+          {
+            show: "count",
+            round: 1,
+            caption: (
+              <>
+                If no one has more than half, the last-place candidate is
+                eliminated. Their voters' next choices are counted instead.
+              </>
+            ),
+          },
+          {
+            show: "count",
+            round: 2,
+            caption: <>This repeats until someone has more than half.</>,
+          },
+          {
+            show: "count",
+            round: 2,
+            caption: <>Ranked-choice voting means there's no "throw away" votes.</>,
+          },
+          {
+            show: "count",
+            round: 2,
+            caption: <>Even if your 1st pick doesn't win, your 2nd pick still has a chance. (Or 3rd, etc)</>,
+          },
+          {
+            show: "districts",
+            caption: (
+              <>
+                City Council works the same way, but there are three winners instead of just one.
+              </>
+            ),
+          },
+          {
+            show: "councilCount",
+            round: 0,
+            caption: (
+              <>
+                Each candidate must win 25% of votes + 1 to win a seat.
+              </>
+            ),
+          },
+          {
+            show: "councilCount",
+            round: 1,
+            caption: (
+              <>
+                A winner's extra votes beyond that move on to their voters'
+                next choices.
+              </>
+            ),
+          },
+          {
+            show: "councilCount",
+            round: 2,
+            caption: (
+              <>
+                If no one else reaches 25% + 1, the last-place candidate is eliminated, and their votes go to each voter's next choice.
+              </>
+            ),
+          },
+        ]}
       />
     </main>
   );

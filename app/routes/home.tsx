@@ -12,7 +12,22 @@ import { RankedChoiceSection } from "../components/ranked-choice-section";
 import { PamphletSection } from "../components/pamphlet-section";
 import { ActionSection } from "../components/action-section";
 import { PortlandFlag } from "../components/portland-flag";
+import { ChapterNav, type Chapter } from "../components/chapter-nav";
 import { VotingSection, type Jurisdiction } from "../components/voting-section";
+
+// Chapters for the footer nav, each starting at a section's id and running
+// until the next one.
+const chapters: Chapter[] = [
+  { title: "Overview", id: "start" },
+  { title: "Mayor", id: "mayor" },
+  { title: "City Council", id: "council" },
+  { title: "Auditor", id: "auditor" },
+  { title: "Multnomah County", id: "county" },
+  { title: "Metro", id: "metro" },
+  { title: "Voting", id: "voting" },
+  { title: "Ranked-Choice Voting", id: "ranked-choice" },
+  { title: "Conclusion", id: "get-involved" },
+];
 
 // Colors per kind of branch, so the federal and city trees line up.
 const executive = { fill: "var(--color-flag-blue)", text: "var(--color-ink)" };
@@ -1477,6 +1492,8 @@ export default function Home() {
           </>,
         ]}
       />
+
+      <ChapterNav chapters={chapters} />
     </main>
   );
 }

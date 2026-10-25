@@ -63,7 +63,7 @@ export function PamphletSection({ id, intros, steps, label, ballotLabel, dropBox
                 purple panel; both shrink a little so the pair fits. */}
             <div
               aria-hidden={dropIn > 0.5}
-              className="relative w-full max-w-xs"
+              className="relative w-[62%] max-w-xs sm:w-full"
               style={{
                 opacity: shown * (1 - dropIn),
                 transform: [drift((1 - shown) * 32), `scale(${1 - 0.22 * reveal})`]
